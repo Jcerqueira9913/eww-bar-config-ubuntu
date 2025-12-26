@@ -15,8 +15,13 @@ Includes a dynamic top bar, a persistent notification dashboard, and control pop
 
 ![Main Bar](pic.png)
 
-![Dashboard and Menus](pic1.png)
-!(dashboard2.png)
+![Main Bar](pic1.png)
+
+![Main Bar](pic3.png)
+
+![Main Bar](pic4.png)
+
+![Main Bar](pic5.png)
 
 ---
 
