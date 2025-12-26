@@ -1,0 +1,496 @@
+;; --- VARIÁVEIS (Apontam para os scripts) ---
+(defpoll time :interval "1s" "date +'%H:%M'")
+(defpoll date :interval "1h" "date +'%a, %d %b'")
+(defvar show_vol false)
+(defvar show_bright false)
+(defpoll net :interval "3s" "scripts/network")
+(defvar notifications_json "[]")
+(defpoll bt_devices :interval "5s" "scripts/bluetooth")
+(defpoll bt_status :interval "2s" "scripts/bluetooth status")
+(defpoll music_info :interval "1s" "scripts/music")
+;; Polling Estado Bluetooth (Icon, Text, Class, Power)
+(defpoll bt_state :interval "2s" "scripts/bluetooth current")
+
+;; Variáveis do Dashboard
+(defpoll username :interval "24h" "scripts/user name")
+
+;; Polling da lista de redes (Atualiza a cada 5s quando aberta)
+(defpoll wifi_networks :interval "5s" :initial "[]" "scripts/wifi_list")
+(defpoll current_wifi :interval "2s" "scripts/wifi_list current")
+
+;; Variável para controlar a janela
+(defvar wifi_rev false)
+
+;; Hardware (Apontam para o script sys_info)
+(defpoll cpu :interval "2s" "scripts/sys_info cpu")
+(defpoll ram :interval "2s" "scripts/sys_info ram")
+(defpoll disk :interval "5m" "scripts/sys_info disk")
+
+;; Scripts Inteligentes
+(defpoll volume :interval "0.1s" "scripts/volume vol")
+(defpoll vol_icon :interval "0.1s" "scripts/volume icon")
+(defpoll brightness :interval "1s" "brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}'")
+(defpoll battery :interval "30s" "scripts/battery percent")
+(defpoll bat_icon :interval "30s" "scripts/battery icon")
+(defpoll wifi_icon :interval "3s" "scripts/network")
+
+;; Sistema
+(defpoll music_title :interval "1s" "playerctl metadata --format '{{ title }}' || echo ''")
+(defpoll current_ws :interval "0.5s" "xdotool get_desktop")
+
+
+;; --- WIDGETS ---
+
+;; 1. ESQUERDA: Logo -> Workspaces -> Hardware
+(defwidget left []
+  (box :orientation "h" :space-evenly false :halign "start" :class "left-container"
+    ;; LOGO
+    (button :class "arch-logo" :onclick "gnome-control-center" "󰕈")
+    
+    ;; WORKSPACES
+    (box :class "workspaces" :orientation "h" :spacing 5
+      (button :class {current_ws == 0 ? "ws-active" : "ws-inactive"} :onclick "xdotool set_desktop 0" "●")
+      (button :class {current_ws == 1 ? "ws-active" : "ws-inactive"} :onclick "xdotool set_desktop 1" "●")
+      (button :class {current_ws == 2 ? "ws-active" : "ws-inactive"} :onclick "xdotool set_desktop 2" "●")
+      (button :class {current_ws == 3 ? "ws-active" : "ws-inactive"} :onclick "xdotool set_desktop 3" "●")
+    )
+
+    (label :text "|" :class "sep-small")
+
+    ;; HARDWARE (Agora mostra GBs)
+    (box :class "stats-box" :spacing 12
+      ;; CPU continua em %
+      (label :text " ${cpu}%" :class "icon-cpu" :tooltip "CPU Load")
+      
+      ;; RAM (Ex: 4G/16G)
+      (label :text " ${ram}" :class "icon-ram" :tooltip "RAM Usada/Total")
+      
+      ;; DISCO (Ex: 50G/200G)
+      (label :text " ${disk}" :class "icon-disk" :tooltip "Disco Usado/Total")
+    )
+
+    (label :text "ㅤ    ◆  " :class "deco-diamond")
+    (music_bar_ctrl)
+  )
+)
+
+;; 2. CENTRO: Notificação -> Data -> Hora
+(defwidget center []
+  (box :orientation "h" :space-evenly false :halign "center" :class "center-container"
+    (button :onclick "eww open closer && eww open dashboard" :class "btn-datetime"
+      (box :orientation "h" :space-evenly false
+        (label :text "" :class "icon-notify")
+        (label :text "|" :class "sep")
+        (label :text " ${date}" :class "date-icon")
+        (label :text "|" :class "sep")
+        (label :text " ${time}" :class "time-icon")
+      )
+    )
+  )
+)
+
+;; 3. DIREITA: Música ... Som -> Brilho -> Rede -> Bateria -> Power
+(defwidget right []
+  (box :orientation "h" :space-evenly false :halign "end" :class "right-container" :spacing 8
+    
+    (button :onclick "eww open --toggle bluetooth_window" 
+            :class "icon-bt ${bt_state.class}" 
+            "${bt_state.icon}  ${bt_state.text}"
+            )
+            (label :text "◆" :class "sep-icon")
+    ;; REDE: Mostra Ícone + Nome. Clica para abrir/fechar menu.
+    (button :onclick "eww open --toggle wifi_window" 
+            :class "icon-wifi ${net.class}" 
+            ;; Mostra ícone e SSID (limitado a 10 letras para não estragar a barra)
+            "${net.icon}  ${net.ssid}" 
+    )
+    
+    ;; --- MÓDULO DE SOM (Ícone + Barra Deslizante) ---
+    (box :class "module-vol" :space-evenly false :orientation "h" :spacing 3
+      ;; Botão do Ícone (Abre/Fecha)
+      (button :onclick "eww update show_vol=${!show_vol}" 
+              :class "icon-vol" 
+              "${vol_icon}")
+      
+      ;; Barra que aparece (Revealer)
+      (revealer :transition "slideleft" :reveal show_vol :duration "350ms"
+        (scale :class "volbar"
+               :value volume
+               :orientation "h"
+               :tooltip "${volume}%"
+               :max 101
+               :min 0
+               :onchange "pamixer --set-volume {}")
+      )
+      ;; Mostra % só se a barra estiver fechada
+      (label :visible {!show_vol} :text "${volume}%" :class "text-vol")
+    )
+
+    ;; --- MÓDULO DE BRILHO (Ícone + Barra Deslizante) ---
+    (box :class "module-bright" :space-evenly false :orientation "h" :spacing 3
+      (button :onclick "eww update show_bright=${!show_bright}" 
+              :class "icon-bright" 
+              "")
+      
+      (revealer :transition "slideleft" :reveal show_bright :duration "350ms"
+        (scale :class "brightbar"
+               :value brightness
+               :orientation "h"
+               :tooltip "${brightness}%"
+               :max 101
+               :min 0
+               :onchange "brightnessctl s {}%")
+      )
+      (label :visible {!show_bright} :text "${brightness}%" :class "text-bright")
+    )
+
+    ;; BATERIA
+    (button :onclick "gnome-power-statistics" :class "icon-bat" "${bat_icon} ${battery}%")
+    
+    ;; POWER
+    (button :class "icon-power" :onclick "eww open --toggle powermenu" "")
+  )
+)
+
+(defwidget bar_layout []
+  (centerbox :orientation "h"
+    (left)
+    (center)
+    (right)
+  )
+)
+
+;; --- JANELA ---
+(defwindow bar
+  :monitor 0
+  :reserve (struts :distance "30px" :side "top")
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "100%"
+                      :height "40px"
+                      :anchor "top center")
+  :stacking "fg"
+  :windowtype "dock"
+  :wm-ignore false
+  (bar_layout)
+)
+
+; --- JANELA POPUP WIFI ---
+(defwindow wifi_window
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%" ;; Vai ser ancorada ao topo direito
+                      :width "15%"
+                      :height "30%"
+                      :anchor "top right")
+  :stacking "overlay"
+  (wifi_widget)
+)
+
+;; --- WIDGET DO WIFI ---
+(defwidget wifi_widget []
+  (box :orientation "v" :space-evenly false :class "wifi-popup"
+    
+    ;; CABEÇALHO: Rede Atual
+    (box :class "wifi-header" :orientation "h" :space-evenly false :spacing 10
+      (label :text "" :class "wifi-header-icon")
+      (box :orientation "v" 
+        (label :text "" :class "wifi-title" :halign "start")
+        (label :text "${current_wifi}" :class "wifi-subtitle" :halign "start")
+      )
+      ;; Botão para abrir definições completas
+      (button :class "wifi-settings-btn" :onclick "gnome-control-center wifi &" "")
+    )
+    
+    (label :text "Redes Disponíveis" :class "wifi-sep")
+
+    ;; LISTA DE REDES (Scrollável)
+    (scroll :vscroll true :hscroll false :height 300
+      (box :orientation "v" :spacing 5 :space-evenly false
+        ;; Loop que cria botões baseados no JSON do script
+        (for network in wifi_networks
+          (button :class "wifi-item" 
+                  ;; Clicar tenta conectar (Funciona melhor em redes conhecidas)
+                  :onclick "nmcli device wifi connect '${network.ssid}' &"
+            (box :orientation "h" :space-evenly false 
+              (label :text "${network.icon}" :class "wifi-item-icon")
+              (label :text "${network.ssid}" :class "wifi-item-text")
+              (label :text "${network.signal}%" :class "wifi-item-signal")
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+;; --- JANELA POWER MENU (Centralizada) ---
+(defwindow powermenu
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "40%"    ;; Largura da janela
+                      :height "20%"   ;; Altura
+                      :anchor "center")
+  :stacking "overlay"
+  (power_widget)
+)
+
+;; --- WIDGET DO POWER MENU ---
+(defwidget power_widget []
+  (box :orientation "v" :space-evenly true :class "powermenu-container"
+    
+    (label :text "Escolha uma ação" :class "powermenu-title")
+
+    ;; Caixa com os 4 botões
+    (box :orientation "h" :space-evenly true :spacing 20
+      
+      ;; 1. BLOQUEAR (Lock)
+      (button :class "btn-lock" 
+              :onclick "loginctl lock-session & eww close powermenu" 
+        (box :orientation "v"
+          (label :text "" :class "btn-icon")
+          (label :text "Bloquear" :class "btn-text")
+        )
+      )
+
+      ;; 2. SAIR (Logout)
+      (button :class "btn-logout" 
+              :onclick "gnome-session-quit --logout --no-prompt & eww close powermenu" 
+        (box :orientation "v"
+          (label :text "" :class "btn-icon")
+          (label :text "Sair" :class "btn-text")
+        )
+      )
+
+      ;; 3. REINICIAR (Reboot)
+      (button :class "btn-reboot" 
+              :onclick "systemctl reboot & eww close powermenu" 
+        (box :orientation "v"
+          (label :text "" :class "btn-icon")
+          (label :text "Reiniciar" :class "btn-text")
+        )
+      )
+
+      ;; 4. DESLIGAR (Shutdown)
+      (button :class "btn-off" 
+              :onclick "systemctl poweroff & eww close powermenu" 
+        (box :orientation "v"
+          (label :text "" :class "btn-icon")
+          (label :text "Desligar" :class "btn-text")
+        )
+      )
+    )
+
+    ;; Botão CANCELAR (Fecha o menu)
+    (button :class "btn-cancel" :onclick "eww close powermenu" "Cancelar")
+  )
+)
+(defwindow closer
+  :monitor 0
+  :geometry (geometry :width "100%" :height "100%")
+  :stacking "fg"
+  :focusable false
+  (button :onclick "eww close dashboard && eww close closer" :class "closer-btn" "")
+)
+;; --- JANELA DASHBOARD (Central) ---
+(defwindow dashboard
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "20%"
+                      :height "30%"
+                      :anchor "top center")
+  :stacking "overlay"
+  (dashboard_widget)
+)
+
+;; --- CONTEÚDO DO DASHBOARD ---
+(defwidget dashboard_widget []
+  (box :orientation "v" :space-evenly false :class "dashboard-container"
+    
+    ;; 1. TOPO: Perfil e Saudação
+    (box :orientation "h" :space-evenly false :class "dash-profile" :spacing 15
+      (label :text "" :class "dash-pfp-icon") ;; Ou usa (image) se tiveres foto
+      (box :orientation "v" :valign "center"
+        (label :text "Olá, ${username}" :class "dash-welcome" :halign "start")
+        (label :text "${date}" :class "dash-date" :halign "start")
+      )
+    
+    ;; ESPAÇADOR (Empurra o botão fechar para a direita)
+      (box :hexpand true)
+
+    )
+    ;; 2. CALENDÁRIO GIGANTE
+    (box :class "dash-cal-box"
+      (calendar :class "dash-calendar" 
+                :show-heading true
+                :show-day-names true)
+    )
+
+    ;; 3. LISTA DE NOTIFICAÇÕES (NOVO)
+    (box :orientation "v" :spacing 5 :space-evenly false :class "notif-list"
+      (for notif in notifications_json
+        (box :orientation "v" :class "notif-item" :space-evenly false
+          (label :text "${notif.title}" :class "notif-title" :halign "start" :limit-width 30)
+          (label :text "${notif.body}" :class "notif-body" :halign "start" :limit-width 40 :wrap true)
+        )
+      )
+      ;; Botão para limpar
+      (button :onclick "/usr/bin/python3 /home/jc/.config/eww/scripts/notifications.py clear" 
+        :class "notif-clear-btn" 
+        "Limpar Tudo")
+    )
+    ;; 3. RODAPÉ (Links Rápidos)
+    (box :orientation "h" :class "dash-links" :spacing 10
+      (button :class "dash-btn" :onclick "gnome-control-center &" " Definições")
+      (button :class "dash-btn" :onclick "nautilus &" " Ficheiros")
+    )
+  )
+)
+
+;; --- JANELA POPUP BLUETOOTH ---
+(defwindow bluetooth_window
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "15%"
+                      :height "30%"
+                      :anchor "top right")
+  :stacking "overlay"
+  (bluetooth_widget)
+)
+
+;; --- WIDGET DO BLUETOOTH ---
+(defwidget bluetooth_widget []
+  (box :orientation "v" :space-evenly false :class "wifi-popup"
+
+    ;; CABEÇALHO
+    (box :class "wifi-header" :orientation "h" :space-evenly false :spacing 10
+
+      ;; Ícone Grande
+      (label :text {bt_state.icon} :class "wifi-header-icon ${bt_state.class}")
+
+      ;; Texto (Nome do Device ou Estado)
+      (box :orientation "v" :hexpand true
+        (label :text "Bluetooth" :class "wifi-title" :halign "start")
+        (label :text {bt_state.text} :class "wifi-subtitle" :halign "start" :limit-width 15)
+      )
+
+      ;; NOVO: Interruptor LIGAR/DESLIGAR (Power)
+      ;; Se estiver ON mostra botão verde, se OFF mostra vermelho
+      (button :class "bt-power-btn ${bt_state.power == 'on' ? 'btn-on' : 'btn-off'}" 
+              :onclick "scripts/bluetooth toggle &" 
+              "")
+
+      ;; Botão Definições
+      (button :class "wifi-btn-tool" :onclick "gnome-control-center bluetooth &" "")
+
+      ;; Botão Fechar
+      (button :class "wifi-btn-close" :onclick "eww close bluetooth_window" "󰅖")
+    )
+
+    (label :text "Dispositivos Emparelhados" :class "wifi-sep")
+
+    ;; (A lista mantém-se igual...)
+    (scroll :vscroll true :hscroll false :height 300
+      (box :orientation "v" :spacing 5 :space-evenly false
+        (for device in bt_devices
+          (button :class "wifi-item" 
+                  :onclick "bluetoothctl ${device.state == 'connected' ? 'disconnect' : 'connect'} ${device.mac} &"
+            (box :orientation "h" :space-evenly false 
+              (label :text "${device.icon}" :class "wifi-item-icon ${device.color}")
+              (label :text "${device.name}" :class "wifi-item-text" :limit-width 20)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+;; --- JANELA POPUP MÚSICA ---
+(defwindow music_window
+  :monitor 0
+  :geometry (geometry :x "0%"
+                      :y "0%"
+                      :width "18%"
+                      :height "20%"
+                      :anchor "top center")
+  :stacking "overlay"
+  (music_widget)
+)
+
+;; --- WIDGET PRINCIPAL ---
+(defwidget music_widget []
+  (box :class "music-popup" :orientation "v" :space-evenly false
+    
+    ;; CABEÇALHO (Botão Fechar)
+    (box :orientation "h" :halign "end"
+      (button :class "music-close-btn" :onclick "eww close music_window" "󰅖")
+    )
+
+    ;; --- CASO 1: SPOTIFY FECHADO ---
+    ;; Nota: Usamos :visible DENTRO da box, não como widget separado
+    (box :orientation "v" 
+         :class "music-empty-box" 
+         :spacing 15
+         :visible {music_info.status == "closed"}  ;; <--- AQUI ESTÁ A CORREÇÃO
+
+      (label :text "󰓇" :class "music-empty-icon")
+      (label :text "Spotify está fechado" :class "music-empty-text")
+      (button :class "music-launch-btn" 
+              :onclick "spotify & eww close music_window" 
+              "Iniciar Spotify")
+    )
+
+    ;; --- CASO 2: A TOCAR (Player) ---
+    (box :orientation "v" 
+         :space-evenly false 
+         :spacing 10
+         :visible {music_info.status != "closed"}  ;; <--- AQUI ESTÁ A CORREÇÃO
+
+      ;; Capa e Texto
+      (box :orientation "h" :space-evenly false :class "music-info-box" :spacing 15
+        (label :text "" :class "music-art-icon")
+        (box :orientation "v" :valign "center" :hexpand true
+          (label :text "${music_info.title}" :class "music-title" :limit-width 20 :halign "start")
+          (label :text "${music_info.artist}" :class "music-artist" :limit-width 20 :halign "start")
+        )
+      )
+
+      ;; Controlos
+      (box :orientation "h" :class "music-controls" :spacing 20 :halign "center"
+        ;; Atualiza os onclicks para usar as variáveis do JSON
+        (button :class "music-ctl-btn" :onclick "${music_info.action_prev}" "")
+        (button :class "music-play-btn" :onclick "${music_info.action_play}" "${music_info.icon}")
+        (button :class "music-ctl-btn" :onclick "${music_info.action_next}" "")
+      )
+    )
+  )
+)
+
+(defwidget music_bar_ctrl []
+  (box :orientation "h" :space-evenly false :class "bar-music-container"
+    
+    ;; 1. CONTROLOS (Só aparecem se NÃO estiver fechado/desligado)
+    (box :orientation "h" 
+         :space-evenly false 
+         :spacing 10
+         :visible {music_info.status != "closed"}
+
+      ;; Agora usamos as ações vindas do Python para garantir que funcionam
+      (button :class "bar-music-btn" :onclick "${music_info.action_prev}" "")
+      (button :class "bar-music-btn" :onclick "${music_info.action_play}" "${music_info.icon}")
+      (button :class "bar-music-btn" :onclick "${music_info.action_next}" "")
+      
+      (label :text "|" :class "sep")
+    )
+
+    ;; 2. BOTÃO DE TÍTULO (Mostra sempre o texto)
+    (button :onclick "eww open --toggle music_window" 
+            :class "bar-music-title ${music_info.class}" 
+            ;; Mostra Ícone + Título (Que agora será "Desligado" se estiver fechado)
+            "  ${music_info.title}" 
+    )
+  )
+)

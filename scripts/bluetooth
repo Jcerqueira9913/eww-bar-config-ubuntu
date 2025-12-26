@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# --- FUNÇÃO: Obter Estado Atual (JSON) ---
+get_status() {
+    # 1. Verifica se o chip está ligado
+    if bluetoothctl show | grep -q "Powered: yes"; then
+        power="on"
+
+        # 2. Tenta encontrar um dispositivo CONECTADO
+        # Procura por linhas com "Connected: yes" nos dispositivos
+        connected_dev=$(bluetoothctl devices | while read -r line; do
+            mac=$(echo "$line" | cut -d ' ' -f 2)
+            name=$(echo "$line" | cut -d ' ' -f 3-)
+            if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+                echo "$name"
+                break
+            fi
+        done)
+
+        if [ -n "$connected_dev" ]; then
+            # LIGADO E CONECTADO
+            icon="󰂱"
+            text="$connected_dev"
+            class="bt-connected"
+        else
+            # LIGADO MAS SEM DISPOSITIVO
+            icon=""
+            text="Ligado"
+            class="bt-on"
+        fi
+    else
+        # DESLIGADO TOTALMENTE
+        power="off"
+        icon="󰂲"
+        text="Desligado"
+        class="bt-off"
+    fi
+
+    printf '{"power": "%s", "icon": "%s", "text": "%s", "class": "%s"}\n' "$power" "$icon" "$text" "$class"
+}
+
+# --- LÓGICA DE ARGUMENTOS ---
+
+# Se chamarmos "./bluetooth current", devolve o estado para a barra
+if [ "$1" == "current" ]; then
+    get_status
+    exit
+fi
+
+# Se chamarmos "./bluetooth toggle", liga ou desliga o chip
+if [ "$1" == "toggle" ]; then
+    state=$(bluetoothctl show | grep "Powered: yes")
+    if [ -n "$state" ]; then
+        bluetoothctl power off
+    else
+        bluetoothctl power on
+    fi
+    exit
+fi
+
+# --- LISTA DE DISPOSITIVOS (Para o menu) ---
+# (Mantém a lógica antiga para a lista scrollável)
+echo -n "["
+first=true
+bluetoothctl devices Paired | while read -r line; do
+    mac=$(echo "$line" | cut -d ' ' -f 2)
+    name=$(echo "$line" | cut -d ' ' -f 3-)
+
+    if bluetoothctl info "$mac" | grep -q "Connected: yes"; then
+        state="connected"
+        icon="󰂱" # Ícone conectado
+        color="bt-connected"
+    else
+        state="disconnected"
+        icon="󰂯" # Ícone desconectado
+        color="bt-disconnected"
+    fi
+
+    if [ "$first" = true ]; then first=false; else echo -n ","; fi
+
+    # JSON Seguro
+    printf '{"mac": "%s", "name": "%s", "state": "%s", "icon": "%s", "color": "%s"}' "$mac" "$name" "$state" "$icon" "$color"
+done
+echo "]"

@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "$1" == "name" ]; then
+    echo "$USER"
+elif [ "$1" == "image" ]; then
+    # Tenta encontrar a face do utilizador, senão usa um ícone genérico
+    icon="/var/lib/AccountsService/icons/$USER"
+    if [ -f "$icon" ]; then echo "$icon"; else echo "assets/profile.png"; fi
+fi

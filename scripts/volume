@@ -1,0 +1,17 @@
+#!/bin/bash
+
+get_vol() {
+    pamixer --get-volume
+}
+
+get_icon() {
+    vol=$(pamixer --get-volume)
+    mute=$(pamixer --get-mute)
+    if [ "$mute" == "true" ]; then echo "󰖁";
+    elif [ "$vol" -eq 0 ]; then echo "󰕿";
+    elif [ "$vol" -lt 50 ]; then echo "󰖀";
+    else echo "󰕾"; fi
+}
+
+if [ "$1" == "vol" ]; then get_vol; fi
+if [ "$1" == "icon" ]; then get_icon; fi

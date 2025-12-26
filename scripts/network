@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Tenta obter o SSID da rede conectada
+ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep "^yes" | cut -d: -f2)
+
+if [ -n "$ssid" ]; then
+    # CONECTADO: Ícone normal, Nome da rede, Classe ativa
+    # Imprime JSON
+    echo "{\"icon\": \"\", \"ssid\": \"$ssid\", \"class\": \"net-online\"}"
+else
+    # DESCONECTADO: Ícone cortado, Texto 'Offline', Classe inativa
+    echo "{\"icon\": \"󰤭\", \"ssid\": \"Offline\", \"class\": \"net-offline\"}"
+fi

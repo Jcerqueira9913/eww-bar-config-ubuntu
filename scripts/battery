@@ -1,0 +1,18 @@
+#!/bin/bash
+bat=/sys/class/power_supply/BAT1
+# Se for BAT0 muda a linha de cima
+
+per=$(cat "$bat/capacity")
+status=$(cat "$bat/status")
+
+if [ "$1" == "percent" ]; then echo "$per"; exit; fi
+
+if [ "$status" == "Charging" ]; then
+    echo ""
+else
+    if [ "$per" -gt 90 ]; then echo ""
+    elif [ "$per" -gt 75 ]; then echo ""
+    elif [ "$per" -gt 50 ]; then echo ""
+    elif [ "$per" -gt 25 ]; then echo ""
+    else echo ""; fi
+fi

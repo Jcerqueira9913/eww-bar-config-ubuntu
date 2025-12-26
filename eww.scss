@@ -1,0 +1,456 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono NF", "JetBrainsMono Nerd Font", monospace;
+}
+
+window {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+
+.left-container, .center-container, .right-container {
+  padding: 0 10px;
+}
+
+
+label, button {
+  text-shadow: 2px 2px 4px #000000;
+  font-weight: bold;
+}
+
+.arch-logo { color: #ff5e0e; font-size: 22px; margin-right: 15px; }
+.ws-active { color: #ffffff; font-size: 16px; margin: 0 5px; }
+.ws-inactive { color: #585b70; font-size: 16px; margin: 0 5px; }
+
+.date-icon { color: #89dceb; }
+.time-icon { color: #f9e2af; }
+.sep { color: #6c7086; margin: 0 10px; }
+
+.icon-cpu { color: #ff5555; margin-right: 10px; }
+.icon-ram { color: #ffb86c; margin-right: 10px; }
+.icon-music { color: #bd93f9; margin-right: 10px; }
+.icon-wifi { color: #8be9fd; margin-right: 5px;}
+.icon-vol { color: #50fa7b; margin-right: 5px;}
+.icon-bat { color: #ff79c6; margin-left: 5px; }
+
+.icon-power { 
+  color: #ff5555; 
+  font-size: 18px;
+  margin-left: 15px; 
+}
+
+.module-vol, .module-bright {
+  padding: 0 5px;
+}
+
+scale trough {
+  min-width: 100px; 
+  min-height: 4px;
+  border-radius: 5px;
+  background-color: #313244; 
+  margin: 0 10px;
+}
+
+scale highlight {
+  border-radius: 5px;
+  min-height: 4px;
+}
+
+scale slider {
+  min-height: 12px;
+  min-width: 12px;
+  margin: -4px 0; 
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 0 3px #000000;
+}
+
+.volbar highlight {
+  background-image: linear-gradient(to right, #a6e3a1, #94e2d5);
+}
+
+.brightbar highlight {
+  background-image: linear-gradient(to right, #f9e2af, #fab387); 
+}
+
+.text-vol { color: #a6e3a1; margin-right: 5px; font-size: 14px;}
+.text-bright { color: #f9e2af; margin-right: 5px; font-size: 14px;}
+
+.wifi-popup {
+  background-color: #11111b;
+  border: 2px solid #313244;
+  border-radius: 15px;
+  padding: 15px;
+  margin-top: 50px; 
+  margin-right: 10px;
+}
+
+.wifi-header {
+  border-bottom: 1px solid #313244;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.wifi-header-icon { color: #89dceb; font-size: 24px; }
+.wifi-title { color: #ffffff; font-weight: bold; }
+.wifi-subtitle { color: #a6e3a1; font-size: 12px; }
+
+.wifi-settings-btn { 
+  color: #cdd6f4; 
+  margin-left: 20px; 
+}
+.wifi-settings-btn:hover { color: #89b4fa; }
+
+.wifi-sep {
+  color: #585b70;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+
+.wifi-item {
+  background-color: #1e1e2e;
+  border-radius: 8px;
+  padding: 8px;
+  transition: 0.2s;
+}
+
+.wifi-item:hover {
+  background-color: #313244;
+}
+
+.wifi-item-icon { color: #f9e2af; margin-right: 10px; }
+.wifi-item-text { color: #cdd6f4; margin-right: 10px; font-size: 13px;}
+.wifi-item-signal { color: #585b70; font-size: 10px; }
+
+powermenu-container {
+  background-color: #11111b; /* Fundo muito escuro */
+  border: 3px solid #313244;
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.powermenu-title {
+  color: #cdd6f4;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.btn-lock, .btn-logout, .btn-reboot, .btn-off {
+  background-color: #1e1e2e;
+  border-radius: 15px;
+  padding: 15px;
+  transition: all 0.2s;
+}
+
+.btn-icon { font-size: 32px; margin-bottom: 10px; }
+.btn-text { font-size: 14px; font-weight: bold; }
+
+
+.btn-lock .btn-icon { color: #f9e2af; }
+.btn-lock:hover { 
+  background-color: #f9e2af; 
+  box-shadow: 0 0 15px #f9e2af;
+}
+.btn-lock:hover .btn-icon, .btn-lock:hover .btn-text { color: #11111b; } /* Texto fica preto no hover */
+
+.btn-logout .btn-icon { color: #89b4fa; }
+.btn-logout:hover { 
+  background-color: #89b4fa; 
+  box-shadow: 0 0 15px #89b4fa;
+}
+.btn-logout:hover .btn-icon, .btn-logout:hover .btn-text { color: #11111b; }
+
+.btn-reboot .btn-icon { color: #cba6f7; }
+.btn-reboot:hover { 
+  background-color: #cba6f7; 
+  box-shadow: 0 0 15px #cba6f7;
+}
+.btn-reboot:hover .btn-icon, .btn-reboot:hover .btn-text { color: #11111b; }
+
+.btn-off .btn-icon { color: #ff5555; }
+.btn-off:hover { 
+  background-color: #ff5555; 
+  box-shadow: 0 0 15px #ff5555;
+}
+.btn-off:hover .btn-icon, .btn-off:hover .btn-text { color: #11111b; }
+
+.btn-cancel {
+  margin-top: 20px;
+  background-color: #313244;
+  color: #a6adc8;
+  padding: 8px;
+  border-radius: 10px;
+}
+.btn-cancel:hover {
+  background-color: #45475a;
+  color: #ffffff;
+}
+
+.control-center {
+  background: #11111b;
+  border: 2px solid #313244;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.notification-row {
+  outline: none;
+  margin: 10px;
+}
+
+.notification {
+  background: #1e1e2e;
+  border-radius: 12px;
+  border: 1px solid #313244;
+  box-shadow: none;
+  padding: 0;
+}
+
+.summary {
+  color: #89dceb; 
+  font-weight: bold;
+}
+
+.body {
+  color: #cdd6f4;
+}
+
+.control-center .notification-row .notification-background .close-button {
+  background: #ff5555; 
+  color: #11111b;
+  border-radius: 100%;
+}
+
+.dashboard-container {
+  background-color: #11111b;
+  border: 2px solid #313244;
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 50px; 
+}
+
+.dash-profile {
+  background-color: #1e1e2e;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.dash-pfp-icon {
+  font-size: 40px;
+  color: #cba6f7; 
+  margin-right: 10px;
+}
+
+.dash-welcome { font-size: 18px; font-weight: bold; color: #ffffff; }
+.dash-date { font-size: 12px; color: #a6adc8; }
+
+.dash-cal-box {
+  background-color: #1e1e2e;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.dash-calendar {
+  color: #cdd6f4;
+  font-family: "JetBrainsMono NF";
+}
+
+
+calendar {
+  font-size: 14px;
+}
+calendar:selected {
+  color: #11111b;
+  background-color: #89b4fa; 
+}
+calendar.header {
+  color: #f9e2af; 
+  font-weight: bold;
+}
+calendar.button {
+  color: #cdd6f4;
+}
+
+.dash-links { margin-top: 5px; }
+
+.dash-btn {
+  background-color: #313244;
+  color: #cdd6f4;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.dash-btn:hover {
+  background-color: #45475a;
+  color: #ffffff;
+}
+
+.dash-subtitle {
+  color: #89dceb;
+  font-size: 14px;
+  margin: 10px 0 5px 0;
+  font-weight: bold;
+}
+
+.notif-item {
+  background-color: #313244;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 5px;
+}
+
+.notif-title { color: #f9e2af; font-weight: bold; font-size: 13px; }
+.notif-body { color: #cdd6f4; font-size: 11px; }
+
+.notif-clear-btn {
+  background-color: #ff5555;
+  color: #11111b;
+  border-radius: 5px;
+  padding: 5px;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.bt-header-icon { 
+  color: #89b4fa; 
+  font-size: 24px; 
+}
+
+
+.bt-connected {
+  color: #a6e3a1; 
+}
+
+.bt-disconnected {
+  color: #6c7086; 
+}
+
+.bt-connected { color: #a6e3a1; margin-right: 5px; }
+
+.bt-on { color: #89b4fa; margin-right: 5px; }
+
+.bt-off { color: #585b70; margin-right: 5px; }
+.bt-off:hover { color: #ff5555; }
+
+
+.bt-power-btn {
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+.btn-on { 
+  color: #a6e3a1; 
+  border: 1px solid #a6e3a1;
+}
+.btn-on:hover { background-color: #a6e3a1; color: #1e1e2e; }
+
+.btn-off { 
+  color: #ff5555; 
+  border: 1px solid #ff5555;
+}
+.btn-off:hover { background-color: #ff5555; color: #1e1e2e; }
+
+.sep-icon {
+  color: #8a8b91; 
+  font-size: 12px; 
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.music-popup {
+  background-color: #11111b;
+  border: 2px solid #313244;
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 50px;
+  margin-right: 10px;
+}
+
+.music-close-btn {
+  color: #ff5555;
+  font-size: 16px;
+  padding: 0 5px;
+}
+
+.music-empty-box {
+  padding: 20px 0;
+}
+.music-empty-icon { font-size: 40px; color: #585b70; }
+.music-empty-text { color: #a6adc8; font-weight: bold; }
+
+.music-launch-btn {
+  background-color: #a6e3a1; 
+  color: #11111b;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 8px;
+}
+.music-launch-btn:hover { background-color: #94e2d5; }
+
+.music-info-box {
+  background-color: #1e1e2e;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.music-art-icon {
+  font-size: 30px;
+  color: #cba6f7;
+  margin-right: 10px;
+}
+
+.music-title { font-weight: bold; color: #ffffff; font-size: 14px; }
+.music-artist { color: #bac2de; font-size: 12px; }
+
+.music-controls { margin-top: 5px; }
+
+.music-ctl-btn {
+  font-size: 20px;
+  color: #cdd6f4;
+  padding: 5px 15px;
+}
+.music-ctl-btn:hover { color: #89b4fa; }
+
+.music-play-btn {
+  font-size: 30px;
+  color: #89dceb;
+  padding: 0 10px;
+}
+.music-play-btn:hover { color: #f9e2af; text-shadow: 0 0 10px #f9e2af; }
+
+.icon-music { color: #cdd6f4; }
+.music-playing { color: #a6e3a1; }
+.music-paused { color: #f9e2af; }  
+.music-off { color: #585b70; }
+
+.bar-music-container {
+  margin-right: 10px; 
+}
+
+.bar-music-btn {
+  color: #cdd6f4;
+  font-size: 14px;
+  padding: 0 5px;
+  transition: color 0.3s;
+}
+.bar-music-btn:hover {
+  color: #89b4fa; 
+}
+
+.bar-music-title {
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.music-playing { color: #a6e3a1; } 
+.music-paused { color: #f9e2af; }  
+.music-off { color: #585b70; }    

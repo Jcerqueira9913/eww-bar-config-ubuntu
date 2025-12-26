@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## CPU: Calcula a carga real (100% - Idle)
+get_cpu() {
+    # Usa o top para pegar o valor exato instantâneo
+    top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print int(100 - $1)}'
+}
+
+## RAM: Formato "4G/16G"
+get_ram() {
+    # 'free -h' dá valores legíveis. O sed remove o 'i' (Gi -> G) para poupar espaço
+    free -h | grep Mem | awk '{print $3 "/" $2}' | sed 's/Gi/G/g' | sed 's/Mi/M/g'
+}
+
+## DISCO (ROM): Formato "50G/250G"
+get_disk() {
+    df -h / | awk 'NR==2 {print $3 "/" $2}'
+}
+
+# Executa a função baseada no argumento
+if [ "$1" == "cpu" ]; then get_cpu; fi
+if [ "$1" == "ram" ]; then get_ram; fi
+if [ "$1" == "disk" ]; then get_disk; fi

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Verifica se está ligado
+if [ "$1" == "current" ]; then
+    nmcli -t -f ACTIVE,SSID dev wifi | grep "^yes" | cut -d: -f2 || echo "Desconectado"
+    exit
+fi
+
+# Gera lista JSON das redes
+# 1. Pega lista do nmcli
+# 2. Remove duplicados e redes sem nome
+# 3. Formata como JSON
+
+nmcli --terse --fields SSID,SIGNAL,SECURITY device wifi list | \
+awk -F: '
+BEGIN { print "[" }
+!seen[$1]++ && $1 != "" {
+    # Define ícone baseado no sinal
+    if ($2 > 75) icon="󰤨";
+    else if ($2 > 50) icon="󰤥";
+    else if ($2 > 25) icon="󰤢";
+    else icon="󰤟";
+
+    # Imprime objeto JSON
+    printf "{\"ssid\":\"%s\", \"signal\":\"%s\", \"icon\":\"%s\", \"sec\":\"%s\"},", $1, $2, icon, $3
+}
+END { print "{}]" }' | \
+sed 's/,{}]/]/g' # Remove a última vírgula extra
