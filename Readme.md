@@ -1,140 +1,123 @@
-Aqui tens um `README.md` profissional, moderno e com estilo "Cyberpunk/Clean", pronto para o GitHub. Já deixei os espaços reservados para colares os teus prints e GIFs.
 
-Cria um ficheiro chamado `README.md` na pasta do teu Eww e cola isto:
+# 🚀 My Custom Eww Bar & Dashboard
 
----
-
-```markdown
-# 🚀 Minha Eww Bar & Dashboard Custom
-
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Eww](https://img.shields.io/badge/Made%20with-Eww-ff79c6.svg)
 ![Linux](https://img.shields.io/badge/OS-Linux-orange.svg)
 
-Uma configuração completa e personalizada para o **Eww (ElKowars wacky widgets)**.
-Inclui uma barra superior dinâmica, um dashboard de notificações persistente e popups de controlo para Música, Wi-Fi e Bluetooth.
+A complete and customized setup for **Eww (ElKowars wacky widgets)**.
+Includes a dynamic top bar, a persistent notification dashboard, and control popups for Music, Wi-Fi, and Bluetooth.
 
-> **Estilo:** Minimalista / Dark / Neon Accents.
+> **Style:** Minimalist / Dark / Neon Accents.
 
 ---
 
 ## ✨ Preview
 
-![Barra Principal](link_para_tua_imagem_barra.png)
+![Main Bar](print.png)
 
-![Dashboard e Menus](link_para_tua_imagem_dashboard.png)
-
----
-
-## 🛠️ Funcionalidades
-
-* **🎵 Music Player Inteligente:**
-    * Deteta automaticamente Spotify ou outros players via `playerctl`.
-    * Mostra Título/Artista e controlos (Play/Pause/Next) diretamente na barra.
-    * Popup dedicado com capa (ícone) e controlos avançados.
-    * *Script Python robusto que ignora erros de leitura.*
-* **🔔 Centro de Notificações:**
-    * Histórico de notificações (não perdes nada se fores à casa de banho).
-    * Botão "Limpar Tudo".
-    * Script Python com Listener DBus em background.
-* **📶 Conectividade:**
-    * Menu **Wi-Fi**: Lista redes, mostra força do sinal e IP.
-    * Menu **Bluetooth**: Lista dispositivos emparelhados, conecta/desconecta com um clique e interruptor Power On/Off.
-* **💻 Sistema:**
-    * Monitorização de CPU, RAM e Bateria.
-    * Calendário e Relógio.
+![Dashboard and Menus](dahsboard1.png)
+!(dashboard2.png)
 
 ---
 
-## 📦 Dependências
+## 🛠️ Features
 
-Para que tudo funcione corretamente, precisas de instalar estas ferramentas no teu sistema (Ubuntu/Debian/Arch):
+* **🎵 Smart Music Player:**
 
-### 1. Ferramentas Base
-* **Eww** (Obviamente)
-* `python3` (Para os scripts de lógica)
-* `playerctl` (Para controlar a música)
-* `socat` & `jq` (Utilitários comuns do Eww)
-* **Nerd Fonts** (Para os ícones funcionarem. Recomendo: *JetBrains Mono Nerd Font*)
+  * Automatically detects Spotify or other players via `playerctl`.
+  * Displays Title/Artist and controls (Play/Pause/Next) directly on the bar.
+  * Dedicated popup with cover art (icon) and advanced controls.
+  * *Robust Python script that safely ignores read errors.*
+* **🔔 Notification Center:**
+
+  * Notification history (you won’t miss anything if you step away).
+  * “Clear All” button.
+  * Background Python script with a DBus listener.
+* **📶 Connectivity:**
+
+  * **Wi-Fi Menu**: Lists networks, shows signal strength and IP address.
+  * **Bluetooth Menu**: Lists paired devices, connect/disconnect with one click, and a Power On/Off toggle.
+* **💻 System:**
+
+  * CPU, RAM, and Battery monitoring.
+  * Calendar and Clock.
+
+---
+
+## 📦 Dependencies
+
+For everything to work correctly, you need to install the following tools on your system (Ubuntu/Debian/Arch):
+
+### 1. Base Tools
+
+* **Eww** (Obviously)
+* `python3` (For logic scripts)
+* `playerctl` (To control music)
+* `socat` & `jq` (Common Eww utilities)
+* **Nerd Fonts** (Required for icons. Recommended: *JetBrains Mono Nerd Font*)
 
 ```bash
 # Ubuntu/Debian
 sudo apt install python3 playerctl jq socat
-
 ```
 
-### 2. Bibliotecas Python
+---
+
+### 2. Python Libraries
 
 ```bash
 pip3 install dbus-python
-# Ou via apt:
+# Or via apt:
 sudo apt install python3-dbus
-
 ```
 
 ---
 
-## 🚀 Instalação
+## 🚀 Installation
 
-1. **Clonar o repositório:**
+1. **Clone the repository:**
+
 ```bash
-git clone [https://github.com/TEU_USER/TEU_REPO.git](https://github.com/TEU_USER/TEU_REPO.git) ~/.config/eww
-
+git clone https://github.com/YOUR_USER/YOUR_REPO.git ~/.config/eww
 ```
 
+2. **Give execution permission to scripts:**
 
-2. **Dar permissão aos scripts:**
 ```bash
 chmod +x ~/.config/eww/scripts/*
-
 ```
 
+3. **Start the bar:**
 
-3. **Iniciar a barra:**
 ```bash
 eww open bar
-
-```
-
-
-
----
-
-## ⚠️ Nota Importante sobre o Spotify
-
-Se usas o Spotify instalado via **Snap** (Loja do Ubuntu), os widgets de música **não vão funcionar** devido às permissões de segurança (Sandbox).
-
-**Solução Recomendada:** Desinstala o Snap e instala a versão oficial `.deb`:
-
-```bash
-# 1. Remover Snap
-sudo snap remove spotify
-
-# 2. Instalar Oficial
-curl -sS [https://download.spotify.com/debian/pubkey_6224F9941A8AA7D1.gpg](https://download.spotify.com/debian/pubkey_6224F9941A8AA7D1.gpg) | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-echo "deb [http://repository.spotify.com](http://repository.spotify.com) stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
-sudo apt-get update && sudo apt-get install spotify-client
-
 ```
 
 ---
 
-## ⚙️ Iniciar com o Sistema
+## ⚠️ Important Note About Spotify
 
-Para iniciar a barra e o script de notificações automaticamente:
+If you use Spotify installed via **Snap** (Ubuntu Store), the music widgets **will not work** due to sandbox security restrictions.
 
-1. Abre **Aplicações de Arranque** (Startup Applications).
-2. Adiciona duas entradas:
-
-| Nome | Comando |
-| --- | --- |
-| **Eww Daemon** | `eww daemon` |
-| **Eww Bar** | `eww open bar` |
-| **Eww Notifs** | `/home/TEU_USER/.config/eww/scripts/notifications.py` |
+**Recommended Solution:** Remove the Snap version and install the official `.deb` version:
 
 ---
 
-## 🤝 Contribuição
+## ⚙️ Start on System Boot
 
-Sente-te à vontade para fazer fork, abrir issues ou sugerir melhorias!
+To automatically start the bar and the notification script:
+
+1. Open **Startup Applications**.
+2. Add the following entries:
+
+| Name           | Command                                                |
+| -------------- | ------------------------------------------------------ |
+| **Eww Daemon** | `eww daemon`                                           |
+| **Eww Bar**    | `eww open bar`                                         |
+| **Eww Notifs** | `/home/YOUR_USER/.config/eww/scripts/notifications.py` |
+
 ---
+
+## 🤝 Contributing
+
+Feel free to fork the project, open issues, or suggest improvements!
