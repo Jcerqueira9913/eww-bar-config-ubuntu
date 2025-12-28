@@ -454,3 +454,24 @@ calendar.button {
 .music-playing { color: #a6e3a1; } 
 .music-paused { color: #f9e2af; }  
 .music-off { color: #585b70; }    
+
+@keyframes blink-red {
+  0% { background-color: #ff5555; color: #1e1e2e; }
+  50% { background-color: #1e1e2e; color: #ff5555; }
+  100% { background-color: #ff5555; color: #1e1e2e; }
+}
+
+.recorder-btn {
+  padding: 0 10px;
+  border-radius: 5px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.record-active {
+  color: #1e1e2e;
+  background-color: #ff5555;
+  animation-name: blink-red;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
