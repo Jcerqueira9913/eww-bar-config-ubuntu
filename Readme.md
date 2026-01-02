@@ -1,5 +1,9 @@
 
-# 🚀 My Custom Eww Bar & Dashboard
+# 🚀 Custom Eww Bar & Dashboard for Linux
+
+<a href="https://www.reddit.com/r/unixporn/">
+    <img src="https://img.shields.io/badge/r%2Funixporn-Rice-FF4500?style=for-the-badge&logo=reddit" alt="r/unixporn">
+</a>
 
 ![Eww](https://img.shields.io/badge/Made%20with-Eww-ff79c6.svg)
 ![Linux](https://img.shields.io/badge/OS-Linux-orange.svg)
