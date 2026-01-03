@@ -87,7 +87,7 @@ sudo apt install python3-dbus
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/YOUR_USER/YOUR_REPO.git ~/.config/eww
+git clone https://github.com/Jcerqueira9913/eww-bar-config-ubuntu.git ~/.config/eww
 ```
 
 2. **Give execution permission to scripts:**
