@@ -69,8 +69,9 @@
       (label :text " ${disk}" :class "icon-disk" :tooltip "Disco Usado/Total")
     )
 
-    (label :text "ㅤ    ◆  " :class "deco-diamond")
+    (label :text "ㅤ ◆  " :class "deco-diamond")
     (music_bar_ctrl)
+    (label :text "ㅤ◆" :class "deco-diamond")
   )
 )
 
@@ -86,6 +87,14 @@
         (label :text " ${time}" :class "time-icon")
       )
     )
+    (label :text "ㅤ ◆ " :class "deco-diamond")
+    (button :class "browser-btn" 
+          :onclick "(wmctrl -xa firefox || firefox &)" 
+          :tooltip "Firefox"
+          (label :text "󰈹" 
+           :class "browser-icon" 
+           :halign "center" 
+           :valign "center"))
   )
 )
 
@@ -93,13 +102,13 @@
 (defwidget right []
   (box :orientation "h" :space-evenly false :halign "end" :class "right-container" :spacing 8
     
-    (button :onclick "eww open --toggle bluetooth_window" 
+    (button :onclick "eww open closer && eww open bluetooth_window" 
             :class "icon-bt ${bt_state.class}" 
             "${bt_state.icon}  ${bt_state.text}"
             )
             (label :text "◆" :class "sep-icon")
     ;; REDE: Mostra Ícone + Nome. Clica para abrir/fechar menu.
-    (button :onclick "eww open --toggle wifi_window" 
+    (button :onclick "eww open closer && eww open wifi_window" 
             :class "icon-wifi ${net.class}" 
             ;; Mostra ícone e SSID (limitado a 10 letras para não estragar a barra)
             "${net.icon}  ${net.ssid}" 
@@ -148,7 +157,7 @@
     (button :onclick "gnome-power-statistics" :class "icon-bat" "${bat_icon} ${battery}%")
     
     ;; POWER
-    (button :class "icon-power" :onclick "eww open --toggle powermenu" "")
+    (button :class "icon-power" :onclick "eww open closer && eww open powermenu" "")
   )
 )
 
@@ -178,8 +187,8 @@
 ; --- JANELA POPUP WIFI ---
 (defwindow wifi_window
   :monitor 0
-  :geometry (geometry :x "0%"
-                      :y "0%" ;; Vai ser ancorada ao topo direito
+  :geometry (geometry :x "-7%"
+                      :y "40px" ;; Vai ser ancorada ao topo direito
                       :width "15%"
                       :height "30%"
                       :anchor "top right")
@@ -228,7 +237,7 @@
 (defwindow powermenu
   :monitor 0
   :geometry (geometry :x "0%"
-                      :y "0%"
+                      :y "40px"
                       :width "40%"    ;; Largura da janela
                       :height "20%"   ;; Altura
                       :anchor "center")
@@ -291,13 +300,13 @@
   :geometry (geometry :width "100%" :height "100%")
   :stacking "fg"
   :focusable false
-  (button :onclick "eww close dashboard && eww close closer" :class "closer-btn" "")
+  (button :onclick "eww close dashboard powermenu music_window wifi_window bluetooth_window closer" :class "closer-btn" "")
 )
 ;; --- JANELA DASHBOARD (Central) ---
 (defwindow dashboard
   :monitor 0
   :geometry (geometry :x "0%"
-                      :y "0%"
+                      :y "40px"
                       :width "20%"
                       :height "30%"
                       :anchor "top center")
@@ -352,8 +361,8 @@
 ;; --- JANELA POPUP BLUETOOTH ---
 (defwindow bluetooth_window
   :monitor 0
-  :geometry (geometry :x "0%"
-                      :y "0%"
+  :geometry (geometry :x "-20%"
+                      :y "40px"
                       :width "15%"
                       :height "30%"
                       :anchor "top right")
@@ -411,8 +420,8 @@
 ;; --- JANELA POPUP MÚSICA ---
 (defwindow music_window
   :monitor 0
-  :geometry (geometry :x "0%"
-                      :y "0%"
+  :geometry (geometry :x "-15%"
+                      :y "40px"
                       :width "18%"
                       :height "20%"
                       :anchor "top center")
@@ -452,10 +461,15 @@
       ;; Capa e Texto
       (box :orientation "h" :space-evenly false :class "music-info-box" :spacing 15
         (label :text "" :class "music-art-icon")
-        (box :orientation "v" :valign "center" :hexpand true
-          (label :text "${music_info.title}" :class "music-title" :limit-width 20 :halign "start")
-          (label :text "${music_info.artist}" :class "music-artist" :limit-width 20 :halign "start")
-        )
+        (button :class "music-title-btn" 
+        ;; Tenta focar a janela. Se falhar, abre o Spotify.
+        :onclick "(wmctrl -xa Spotify || spotify &) && eww close music_window closer" 
+  
+  (box :orientation "v" :valign "center" :hexpand true
+    (label :text "${music_info.title}" :class "music-title" :limit-width 20 :halign "start")
+    (label :text "${music_info.artist}" :class "music-artist" :limit-width 20 :halign "start")
+  )
+)
       )
 
       ;; Controlos
@@ -487,10 +501,11 @@
     )
 
     ;; 2. BOTÃO DE TÍTULO (Mostra sempre o texto)
-    (button :onclick "eww open --toggle music_window" 
-            :class "bar-music-title ${music_info.class}" 
-            ;; Mostra Ícone + Título (Que agora será "Desligado" se estiver fechado)
-            "  ${music_info.title}" 
+    (button :onclick "eww open closer && eww open music_window" 
+            :class "bar-music-title ${music_info.class}"
+            (label :text "  ${music_info.title}" 
+               :limit-width 150
+               :show-truncated true)
     )
   )
 )
