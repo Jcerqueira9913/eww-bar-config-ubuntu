@@ -1,4 +1,3 @@
-
 # 🚀 Custom Eww Bar & Dashboard for Linux
 
 <a href="https://www.reddit.com/r/unixporn/">
@@ -61,6 +60,7 @@ For everything to work correctly, you need to install the following tools on you
 
 * **Eww** (Obviously)
 * `python3` (For logic scripts)
+* `wmctrl` (For apps focus control)
 * `playerctl` (To control music)
 * `socat` & `jq` (Common Eww utilities)
 * **Nerd Fonts** (Required for icons. Recommended: *JetBrains Mono Nerd Font*)
