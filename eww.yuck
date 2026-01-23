@@ -162,7 +162,7 @@
 )
 
 (defwidget bar_layout []
-  (centerbox :orientation "h"
+  (centerbox :orientation "h" :class "bar-container"
     (left)
     (center)
     (right)
@@ -396,7 +396,7 @@
       (button :class "wifi-btn-tool" :onclick "gnome-control-center bluetooth &" "")
 
       ;; Botão Fechar
-      (button :class "wifi-btn-close" :onclick "eww close bluetooth_window" "󰅖")
+      (button :class "wifi-btn-close" :onclick "eww close bluetooth_window closer" "󰅖")
     )
 
     (label :text "Dispositivos Emparelhados" :class "wifi-sep")
@@ -422,8 +422,7 @@
   :monitor 0
   :geometry (geometry :x "-15%"
                       :y "40px"
-                      :width "18%"
-                      :height "20%"
+                      :width "350px"
                       :anchor "top center")
   :stacking "overlay"
   (music_widget)
@@ -431,53 +430,70 @@
 
 ;; --- WIDGET PRINCIPAL ---
 (defwidget music_widget []
-  (box :class "music-popup" :orientation "v" :space-evenly false
-    
-    ;; CABEÇALHO (Botão Fechar)
+  
+  (box :class "music-popup" 
+       :orientation "v" 
+       :space-evenly false
+       :valign "start"
+       :vexpand false      ;; Importante: Não deixa crescer verticalmente
+       
+    ;; --- 1. CABEÇALHO (Botão Fechar) ---
     (box :orientation "h" :halign "end"
-      (button :class "music-close-btn" :onclick "eww close music_window" "󰅖")
+      (button :class "music-close-btn" :onclick "eww close music_window closer" "󰅖")
     )
 
-    ;; --- CASO 1: SPOTIFY FECHADO ---
-    ;; Nota: Usamos :visible DENTRO da box, não como widget separado
+    ;; --- 2. CASO 1: SPOTIFY FECHADO ---
     (box :orientation "v" 
          :class "music-empty-box" 
          :spacing 15
-         :visible {music_info.status == "closed"}  ;; <--- AQUI ESTÁ A CORREÇÃO
+         :visible {music_info.status == "closed"}
+         :vexpand false
 
       (label :text "󰓇" :class "music-empty-icon")
       (label :text "Spotify está fechado" :class "music-empty-text")
       (button :class "music-launch-btn" 
-              :onclick "spotify & eww close music_window" 
+              :onclick "spotify & eww close music_window closer" 
               "Iniciar Spotify")
     )
 
-    ;; --- CASO 2: A TOCAR (Player) ---
+    ;; --- 3. CASO 2: A TOCAR (Player) ---
     (box :orientation "v" 
          :space-evenly false 
          :spacing 10
-         :visible {music_info.status != "closed"}  ;; <--- AQUI ESTÁ A CORREÇÃO
+         :visible {music_info.status != "closed"}
+         :vexpand false
 
-      ;; Capa e Texto
+      ;; A. Info (Capa pequena + Texto)
       (box :orientation "h" :space-evenly false :class "music-info-box" :spacing 15
         (label :text "" :class "music-art-icon")
+        
+        ;; CORREÇÃO DE SINTAXE AQUI:
         (button :class "music-title-btn" 
-        ;; Tenta focar a janela. Se falhar, abre o Spotify.
-        :onclick "(wmctrl -xa Spotify || spotify &) && eww close music_window closer" 
-  
-  (box :orientation "v" :valign "center" :hexpand true
-    (label :text "${music_info.title}" :class "music-title" :limit-width 20 :halign "start")
-    (label :text "${music_info.artist}" :class "music-artist" :limit-width 20 :halign "start")
-  )
-)
+                :onclick "(wmctrl -xa Spotify || spotify &) && eww close music_window closer"
+          (box :orientation "v" :valign "center" :hexpand true
+            (label :text "${music_info.title}" :class "music-title" :limit-width 20 :halign "start")
+            (label :text "${music_info.artist}" :class "music-artist" :limit-width 20 :halign "start")
+          )
+        )
       )
 
-      ;; Controlos
+      ;; B. Controlos
       (box :orientation "h" :class "music-controls" :spacing 20 :halign "center"
-        ;; Atualiza os onclicks para usar as variáveis do JSON
+        (button :class "music-heart-btn ${music_info.is_liked ? 'liked' : ''}" 
+                :tooltip {music_info.is_liked ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
+                :onclick "/home/jc/.config/eww/scripts/spotify_add_like '${music_info.artist}' '${music_info.title}'" 
+                {music_info.is_liked ? "" : ""})
         (button :class "music-ctl-btn" :onclick "${music_info.action_prev}" "")
         (button :class "music-play-btn" :onclick "${music_info.action_play}" "${music_info.icon}")
         (button :class "music-ctl-btn" :onclick "${music_info.action_next}" "")
+      )
+
+      ;; C. Capa do Álbum (Imagem Grande)
+      (box :class "album-art" 
+           :style "background-image: url('${music_info.image}');"
+           ;; width removido para usar 100% da box
+           :height 300
+           :vexpand false
       )
     )
   )
@@ -489,7 +505,7 @@
     ;; 1. CONTROLOS (Só aparecem se NÃO estiver fechado/desligado)
     (box :orientation "h" 
          :space-evenly false 
-         :spacing 10
+         :spacing 7
          :visible {music_info.status != "closed"}
 
       ;; Agora usamos as ações vindas do Python para garantir que funcionam

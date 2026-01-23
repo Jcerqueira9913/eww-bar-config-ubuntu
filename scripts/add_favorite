@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# --- CONFIGURAÇÃO ---
+DB_FILE="$HOME/.config/eww/scripts/favoritos.json"
+
+# --- VERIFICAÇÃO DE ARGUMENTOS ---
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Erro: Faltam argumentos."
+    exit 1
+fi
+
+ARTIST="$1"
+TITLE="$2"
+SONG_ID="$ARTIST - $TITLE"
+
+# --- DEBUG ---
+echo "A processar: $SONG_ID"
+
+# --- PREPARAÇÃO DO FICHEIRO ---
+if [ ! -s "$DB_FILE" ]; then
+    echo "[]" > "$DB_FILE"
+fi
+
+# --- LÓGICA JQ CORRIGIDA ---
+tmp=$(mktemp)
+
+# CORREÇÃO: Mudei o 'fi' para 'end'
+jq --arg song "$SONG_ID" '
+    if index($song) then
+        . - [$song]
+    else
+        . + [$song]
+    end
+' "$DB_FILE" > "$tmp"
+
+# --- VERIFICAÇÃO ---
+if [ -s "$tmp" ]; then
+    mv "$tmp" "$DB_FILE"
+else
+    rm "$tmp"
+fi

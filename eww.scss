@@ -4,12 +4,17 @@
 }
 
 window {
-  background-color: rgba(12, 11, 11, 0.277);
+  background-color: rgba(12, 11, 11, 0);
   background-image: none;
   border: none;
   box-shadow: none;
 }
-
+.bar-container {
+  background: rgba(12, 11, 11, 0.315);
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
 
 .left-container, .center-container, .right-container {
   padding: 0 10px;
@@ -364,12 +369,24 @@ calendar.button {
   margin-left: 10px;
   margin-right: 10px;
 }
-
+#music_window, #music_window * {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+}
+.music-wrapper {
+  background-color: rgba(12, 11, 11, 0); 
+  box-shadow: none;
+  border: none;
+}
 .music-popup {
   background-color: #11111b;
   border: 2px solid #313244;
   border-radius: 15px;
-  padding: 20px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
   margin-top: 0px;
   margin-right: 10px;
 }
@@ -377,7 +394,7 @@ calendar.button {
 .music-close-btn {
   color: #ff5555;
   font-size: 16px;
-  padding: 0 5px;
+  padding: 5px;
 }
 
 .music-empty-box {
@@ -398,8 +415,8 @@ calendar.button {
 .music-info-box {
   background-color: #1e1e2e;
   border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 10px;
+  margin-bottom: 0px;
 }
 
 .music-art-icon {
@@ -510,4 +527,28 @@ calendar.button {
 
 .browser-btn:hover > .browser-icon {
   color: #ffffff;
+}
+
+.album-art {
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+}
+
+.music-heart-btn {
+  color: #cdd6f4; 
+  font-size: 18px;
+  background-color: transparent;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.music-heart-btn:hover {
+  color: #f38ba8; 
+}
+
+.music-heart-btn.liked {
+  color: #ed8796; 
+  text-shadow: 0 0 5px rgba(237, 135, 150, 0.5); /* Brilho */
 }

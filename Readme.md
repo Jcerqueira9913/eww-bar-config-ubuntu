@@ -1,4 +1,4 @@
-# 🚀 Custom Eww Bar & Dashboard for Linux
+# [Gnome] 🚀 Custom Top Bar & Dashboard for Linux
 
 <a href="https://www.reddit.com/r/unixporn/">
     <img src="https://img.shields.io/badge/r%2Funixporn-Rice-FF4500?style=for-the-badge&logo=reddit" alt="r/unixporn">
@@ -67,7 +67,7 @@ For everything to work correctly, you need to install the following tools on you
 
 ```bash
 # Ubuntu/Debian
-sudo apt install python3 playerctl jq socat
+sudo apt install python3 playerctl jq socat wmctrl
 ```
 
 ---

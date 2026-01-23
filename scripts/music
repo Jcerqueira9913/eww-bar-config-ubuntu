@@ -1,35 +1,33 @@
 #!/usr/bin/env python3
 import json
 import sys
+import os
+import urllib.request # Para baixar a imagem
 
-# Tenta importar a biblioteca nativa de comunicação do Linux
+# Tenta importar dbus
 try:
     import dbus
 except ImportError:
-    # Fallback de emergência se faltar a lib (raro no Ubuntu)
-    print(json.dumps({"status": "closed", "title": "Erro: python-dbus", "class": "music-off", "icon": "MX", "action_play": "", "action_next": "", "action_prev": ""}))
+    print(json.dumps({"status": "closed", "title": "Erro: lib dbus", "class": "music-off", "image": "", "icon": "MX"}))
     sys.exit()
+
+# Ficheiros temporários para a capa
+COVER_PATH = "/tmp/spotify_cover.png"
+CACHE_PATH = "/tmp/spotify_cover_url.txt"
 
 def get_spotify_data():
     try:
-        # 1. Liga-se ao Sistema de Mensagens (Session Bus)
         bus = dbus.SessionBus()
-
-        # 2. Tenta encontrar o Spotify especificamente
         proxy = bus.get_object('org.mpris.MediaPlayer2.spotify', '/org/mpris/MediaPlayer2')
         properties_manager = dbus.Interface(proxy, 'org.freedesktop.DBus.Properties')
 
-        # 3. Pede os dados DIRETAMENTE à fonte (sem intermediários)
-        # Interface Player
+        # Pede metadados e status
         meta = properties_manager.Get('org.mpris.MediaPlayer2.Player', 'Metadata')
         status = properties_manager.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus')
-
         return status, meta
     except dbus.exceptions.DBusException:
-        # Se der erro aqui, é porque o Spotify NÃO está a correr
         return None, None
 
-# Executa a função
 status_text, metadata = get_spotify_data()
 
 # --- CENÁRIO 1: SPOTIFY FECHADO ---
@@ -40,47 +38,81 @@ if status_text is None:
         "artist": "",
         "icon": "",
         "class": "music-off",
+        "image": "images/music_default.png", # Podes por uma imagem padrão aqui
         "action_play": "spotify &",
         "action_next": "",
-        "action_prev": ""
+        "action_prev": "",
+        "action_fav": "" 
     }))
     sys.exit()
 
 # --- CENÁRIO 2: SPOTIFY ABERTO ---
 
-# Extrair Título (xesam:title)
-# DBus retorna tipos complexos, convertemos para string
+# 1. Título e Artista
 try:
     title = str(metadata.get('xesam:title', 'Música Sem Nome'))
 except:
     title = "Desconhecido"
 
-# Extrair Artista (xesam:artist) - Geralmente é uma lista ['Artista'], pegamos o primeiro
 try:
     artist_list = metadata.get('xesam:artist', [''])
     artist = str(artist_list[0]) if len(artist_list) > 0 else ""
 except:
     artist = ""
 
-# Lógica de Ícones
+# 2. Lógica da CAPA DO ÁLBUM (Download Inteligente)
+try:
+    art_url = str(metadata.get('mpris:artUrl', ''))
+    
+    # Verifica se a música mudou lendo o cache anterior
+    cached_url = ""
+    if os.path.exists(CACHE_PATH):
+        with open(CACHE_PATH, 'r') as f:
+            cached_url = f.read()
+
+    # Se o URL for novo e não estiver vazio, baixa a imagem
+    if art_url and art_url != cached_url:
+        try:
+            urllib.request.urlretrieve(art_url, COVER_PATH)
+            # Atualiza o cache
+            with open(CACHE_PATH, 'w') as f:
+                f.write(art_url)
+        except:
+            pass # Se falhar o download, mantém a antiga ou nada
+    
+    image_to_show = COVER_PATH if os.path.exists(COVER_PATH) else "images/music_default.png"
+    
+except:
+    image_to_show = "images/music_default.png"
+
+
+# 3. Ícones de Play/Pause
 if status_text == "Playing":
     icon = ""
     css_class = "music-playing"
-    # Usamos dbus-send para garantir que o comando funciona sem playerctl
     act_play = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
 else:
     icon = ""
     css_class = "music-paused"
     act_play = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
 
+with open("/home/jc/.config/eww/scripts/favoritos.json", "r") as db_file:
+    DB_check = False
+    try:
+        DB_data = json.load(db_file)
+        DB_check = any(f"{artist} - {title}" in item for item in DB_data)
+    except:
+        pass
 # JSON Final
 print(json.dumps({
     "status": status_text,
     "title": title,
     "artist": artist,
     "icon": icon,
+    "image": image_to_show,
     "class": css_class,
+    "is_liked": DB_check,
     "action_play": act_play,
     "action_next": "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next",
-    "action_prev": "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+    "action_prev": "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous",
 }))

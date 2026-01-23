@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# --- DEBUG (CRUCIAL) ---
+# Isto vai criar um ficheiro em /tmp/eww_music.log
+# Se falhar, abre esse ficheiro para ver o erro!
+exec >> /tmp/eww_music.log 2>&1
+
+echo "--- Nova Execução: $(date) ---"
+echo "Argumentos recebidos: Artista='$1', Titulo='$2'"
+
+# --- VALIDAÇÃO ---
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "ERRO: Argumentos vazios!"
+    exit 1
+fi
+
+ARTIST="$1"
+TITLE="$2"
+
+# --- PASSO 1: ATUALIZAR A DB (Síncrono) ---
+# 1. Removi o "&" do fim. O script tem de esperar isto acabar (demora milissegundos).
+# 2. Usa $HOME em vez de ~ para evitar problemas de path.
+# 3. VERIFICA O NOME DO FICHEIRO: É 'add_favorite.sh' ou 'spotify_add_like'?
+#    Vou assumir 'spotify_add_like' baseando-me no que fizemos antes.
+#    Se o teu ficheiro se chamar 'add_favorite.sh', muda o nome abaixo.
+
+SCRIPT_DB="$HOME/.config/eww/scripts/add_favorite"
+
+if [ -f "$SCRIPT_DB" ]; then
+    echo "A executar script DB..."
+    "$SCRIPT_DB" "$ARTIST" "$TITLE"
+    echo "Script DB terminou com código $?"
+else
+    echo "ERRO CRÍTICO: O ficheiro $SCRIPT_DB não foi encontrado!"
+    exit 1
+fi
+
+# --- PASSO 2: CONTROLAR O SPOTIFY ---
+echo "A enviar teclas para o Spotify..."
+wmctrl -xa Spotify && sleep 0.2 && xdotool key --clearmodifiers Shift+Alt+b
+
+echo "Concluído com sucesso."
