@@ -550,5 +550,42 @@ calendar.button {
 
 .music-heart-btn.liked {
   color: #ed8796; 
-  text-shadow: 0 0 5px rgba(237, 135, 150, 0.5); /* Brilho */
+  text-shadow: 0 0 5px rgba(237, 135, 150, 0.5); 
+}
+
+@keyframes pulse-red {
+  0% { background-color: rgba(243, 139, 168, 0.2); color: #f38ba8; }
+  50% { background-color: rgba(243, 139, 168, 0.5); color: #ff0000; text-shadow: 0 0 5px red; }
+  100% { background-color: rgba(243, 139, 168, 0.2); color: #f38ba8; }
+}
+
+.record-btn {
+  padding: 0 10px;
+  border-radius: 15px;
+  transition: all 0.3s;
+  margin-right: 5px;
+}
+
+.record-btn.idle {
+  color: #6c7086;
+  background-color: transparent;
+}
+
+.record-btn.idle:hover {
+  color: #cdd6f4;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.record-btn.recording {
+  color: #f38ba8; 
+  animation: pulse-red 2s infinite; 
+}
+
+.rec-icon {
+  font-size: 16px;
+}
+
+.rec-time {
+  font-weight: bold;
+  font-family: monospace; 
 }

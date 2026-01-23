@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# --- CONFIGURAÇÃO ---
+VID_DIR="/home/jc/Videos/Screencasts"
+TIMER_FILE="/tmp/eww_rec_start"
+RECORDER="ffmpeg"
+
+# Garante que a pasta existe
+mkdir -p "$VID_DIR"
+
+# Função para formatar segundos em MM:SS
+format_time() {
+    local T=$1
+    local M=$((T / 60))
+    local S=$((T % 60))
+    printf "%02d:%02d" $M $S
+}
+is_recording() {
+    pgrep -f "ffmpeg.*x11grab" > /dev/null
+}
+get_status() {
+    if pgrep -x "$RECORDER" > /dev/null; then
+        # ESTÁ A GRAVAR
+        if [ -f "$TIMER_FILE" ]; then
+            START=$(cat "$TIMER_FILE")
+            NOW=$(date +%s)
+            DIFF=$((NOW - START))
+            TIME_STR=$(format_time $DIFF)
+        else
+            TIME_STR="00:00"
+        fi
+        
+        echo "{\"status\": \"recording\", \"class\": \"recording\", \"icon\": \"\", \"time\": \"$TIME_STR\"}"
+    else
+        # ESTÁ PARADO
+        # Limpa o ficheiro de tempo se existir
+        [ -f "$TIMER_FILE" ] && rm "$TIMER_FILE"
+        
+        echo "{\"status\": \"idle\", \"class\": \"idle\", \"icon\": \"\", \"time\": \"\"}"
+    fi
+}
+
+toggle_record() {
+    if is_recording; then
+        # --- PARAR ---
+        pkill -SIGINT -f "ffmpeg"
+        rm "$TIMER_FILE"
+        notify-send "Gravação Terminada" "Guardado em: $VID_DIR" -i camera-video
+    else
+        # --- INICIAR ---
+        FILENAME="$VID_DIR/Gravacao_$(date +'%Y-%m-%d_%H-%M-%S').mp4"
+        
+        # Deteta resolução (mantém igual)
+        RES=$(xdpyinfo | awk '/dimensions/{print $2}')
+        if [ -z "$RES" ]; then RES="1920x1080"; fi
+        
+        date +%s > "$TIMER_FILE"
+        
+        # COMANDO NVIDIA OPTIMIZADO
+        # -c:v h264_nvenc: Usa o hardware da NVIDIA
+        # -preset p1: O modo mais rápido possível (baixa latência)
+        # -qp 23: Qualidade constante (quanto menor, melhor qualidade, 23 é equilibrado)
+        setsid ffmpeg \
+    -f x11grab \
+    -thread_queue_size 4096 \
+    -video_size 1920x1080 \
+    -framerate 60 \
+    -i :1.0 \
+    -c:v h264_nvenc \
+    -preset p1 \
+    -qp 23 \
+    -pix_fmt yuv420p \
+    "$FILENAME" > /dev/null 2>&1 &
+        
+        notify-send "Gravação GPU (NVENC)" "A gravar a 60fps..." -i media-record
+    fi
+}
+
+# --- CONTROLO ---
+case "$1" in
+    toggle) toggle_record ;;
+    status) get_status ;;
+esac

@@ -8,6 +8,8 @@
 (defpoll bt_devices :interval "5s" "scripts/bluetooth")
 (defpoll bt_status :interval "2s" "scripts/bluetooth status")
 (defpoll music_info :interval "1s" "scripts/music")
+;; Polling do Gravador (1s para atualizar o contador)
+(defpoll record_status :interval "1s" "scripts/record status")
 ;; Polling Estado Bluetooth (Icon, Text, Class, Power)
 (defpoll bt_state :interval "2s" "scripts/bluetooth current")
 
@@ -101,7 +103,7 @@
 ;; 3. DIREITA: Música ... Som -> Brilho -> Rede -> Bateria -> Power
 (defwidget right []
   (box :orientation "h" :space-evenly false :halign "end" :class "right-container" :spacing 8
-    
+    (recorder)
     (button :onclick "eww open closer && eww open bluetooth_window" 
             :class "icon-bt ${bt_state.class}" 
             "${bt_state.icon}  ${bt_state.text}"
@@ -522,6 +524,22 @@
             (label :text "  ${music_info.title}" 
                :limit-width 150
                :show-truncated true)
+    )
+  )
+)
+
+(defwidget recorder []
+  (button :class "record-btn ${record_status.class}" 
+          :onclick "scripts/record toggle"
+          :tooltip "Gravar Ecrã"
+    (box :orientation "h" :space-evenly false :spacing 5
+      ;; Ícone (Muda entre Camara e Stop)
+      (label :text "${record_status.icon}" :class "rec-icon")
+
+      ;; Tempo (Só visível se estiver a gravar)
+      (label :text "${record_status.time}" 
+             :visible {record_status.status == "recording"}
+             :class "rec-time")
     )
   )
 )
