@@ -1,0 +1,6 @@
+{
+    "name": "Force Stop Recording",
+    "description": "Pára a gravação ao detetar /tmp/stop_gnome_rec",
+    "uuid": "parar-gravacao@jc",
+    "shell-version": [ "45", "46", "47" ]
+}
