@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# --- CONFIGURAÇÃO ---
+TIMER_FILE="/tmp/eww_rec_start"
+# Aponta para o teu script de "Pânico" que criámos antes (parar_force.sh)
+STOP_SCRIPT="$HOME/.config/eww/scripts/parar.sh" 
+
+# Função para formatar segundos em MM:SS
+format_time() {
+    local T=$1
+    local M=$((T / 60))
+    local S=$((T % 60))
+    printf "%02d:%02d" $M $S
+}
+
+get_status() {
+    # Se o ficheiro de tempo existe, o EWW mostra o cronómetro
+    if [ -f "$TIMER_FILE" ]; then
+        START=$(cat "$TIMER_FILE")
+        NOW=$(date +%s)
+        DIFF=$((NOW - START))
+        TIME_STR=$(format_time $DIFF)
+        
+        # JSON: Estado Gravando (Ícone Pause/Stop)
+        echo "{\"status\": \"recording\", \"class\": \"recording\", \"icon\": \"\", \"time\": \"$TIME_STR\"}"
+    else
+        # JSON: Estado Parado (Ícone Gravar)
+        echo "{\"status\": \"idle\", \"class\": \"idle\", \"icon\": \"\", \"time\": \"\"}"
+    fi
+}
+
+wait_for_recording() {
+    # Monitoriza o journalctl à espera que o serviço de screencast acorde.
+    # Aumentei para 30s para te dar tempo de escolher a área no menu do GNOME.
+    
+    START_MONITOR=$(date "+%Y-%m-%d %H:%M:%S")
+    
+    for i in {1..30}; do
+        # Procura EXATAMENTE a mensagem que encontraste no teu log
+        if journalctl --user --since "$START_MONITOR" --no-pager | grep -q "activated service 'org.gnome.Shell.Screencast'"; then
+            
+            # SUCESSO: O serviço acordou! Iniciamos o cronómetro.
+            date +%s > "$TIMER_FILE"
+            exit 0
+        fi
+        sleep 1
+    done
+    
+    # Se passarem 30s e não escolheres nada, o script desiste (não cria o timer).
+}
+
+toggle_record() {
+    if [ -f "$TIMER_FILE" ]; then
+        # --- PARAR (STOP) ---
+        
+        # 1. Executa o script que mata o GNOME/Portal
+        if [ -x "$STOP_SCRIPT" ]; then
+            "$STOP_SCRIPT"
+        else
+            bash "$STOP_SCRIPT"
+        fi
+
+        # 2. Apaga o ficheiro do tempo (pára o cronómetro no EWW)
+        rm "$TIMER_FILE"
+
+    else
+        # --- INICIAR (START) ---
+        
+        # 1. Envia o atalho para abrir o menu de gravação nativo
+        xdotool key --clearmodifiers Ctrl+Alt+Shift+R
+        
+        # 2. Inicia o detetive de logs em background
+        wait_for_recording &
+    fi
+}
+
+# --- CONTROLO ---
+case "$1" in
+    toggle) toggle_record ;;
+    status) get_status ;;
+esac
