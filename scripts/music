@@ -96,7 +96,7 @@ else:
     css_class = "music-paused"
     act_play = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
 
-with open("/home/jc/.config/eww/scripts/favoritos.json", "r") as db_file:
+with open("/home/" + os.getlogin() + "/.config/eww/scripts/favoritos.json", "r") as db_file:
     DB_check = False
     try:
         DB_data = json.load(db_file)
